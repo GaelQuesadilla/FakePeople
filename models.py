@@ -2,6 +2,7 @@ import uuid
 import random
 import errors
 import json
+import csv
 from colorama import init, Fore
 
 init(autoreset=True)
@@ -76,3 +77,67 @@ class Persons:
 
     def genFullNameString(self, item):
         return f"{item.get("fLastName")} {item.get("mLastName")} {item.get("name")}"
+
+    def saveAsCsv(self, docName="data.csv"):
+        with open(docName, "w", encoding="UTF-8") as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=self.items[0].keys())
+            writer.writeheader()
+            writer.writerows(self.items)
+
+
+class Students(Persons):
+    def addGrade(self, number, grade, **kwargs):
+        mods = 0
+        for index in range(len(self.items)):
+            item = self.items[index]
+            if item.get("grade") is None:
+                item["grade"] = grade
+                for key in kwargs:
+                    item[key] = kwargs.get(key)
+                mods += 1
+            if mods == number:
+                break
+
+        if mods == number:
+            print(
+                Fore.GREEN + f"grade has ben added to {mods} of {number} items")
+        else:
+            print(
+                Fore.YELLOW + f"grade has ben added to {mods} of {number} items")
+
+    def addScore(self, mu, sigma, minimalScore=5, maxScore=10, floatNumbers=2):
+        mods = 0
+        for item in self.items:
+            if item.get("score") is None:
+                idealScore = round(random.gauss(mu, sigma), floatNumbers)
+
+                score = idealScore
+                if idealScore > maxScore:
+                    score = maxScore
+                elif idealScore < minimalScore:
+                    score = minimalScore
+
+                item["score"] = score
+                mods += 1
+        print(Fore.GREEN + f"score has ben added to {mods} items")
+
+
+students = Students()
+students.create(540)
+students.addGenre()
+students.addNames()
+students.addGrade(45, "2", group="A")
+students.addGrade(45, "2", group="B")
+students.addGrade(45, "2", group="C")
+students.addGrade(45, "2", group="D")
+students.addGrade(45, "4", group="A")
+students.addGrade(45, "4", group="B")
+students.addGrade(45, "4", group="C")
+students.addGrade(45, "4", group="D")
+students.addGrade(45, "6", group="A")
+students.addGrade(45, "6", group="B")
+students.addGrade(45, "6", group="C")
+students.addGrade(45, "6", group="D")
+students.addScore(8.5, 1)
+
+students.saveAsCsv()
