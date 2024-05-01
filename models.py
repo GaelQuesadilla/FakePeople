@@ -1,11 +1,38 @@
-import uuid
 import random
 import errors
 import json
 import csv
 from colorama import init, Fore
+import datetime
 
 init(autoreset=True)
+dateFormat = "%d/%m/%Y"
+
+characters = "ABCDEFGHIJKLNÑMNOPQRSTUVWXYZ1234567890"
+
+
+def dateBetweenYears(date, minYears, maxYears):
+    minDays = minYears * 365.25
+    maxDays = maxYears * 365.25
+
+    daysSinceDate = random.randrange(round(minDays), round(maxDays))
+    newDate = date + datetime.timedelta(days=daysSinceDate)
+
+    return newDate
+
+
+def shuffleList(inputList: list or tuple):
+    newList = inputList
+    random.shuffle(newList)
+    return newList
+
+
+def genKey(chars, n):
+    key = ""
+    for _ in range(0, n):
+        key += random.choices(chars)[0]
+
+    return key
 
 
 class Persons:
@@ -24,6 +51,93 @@ class Persons:
                 item["gender"] = random.choice(["male", "female"])
                 mods += 1
         print(Fore.GREEN + f"Genre has ben added to {mods} items")
+
+    def addBirthDate(self, minAge=18, maxAge=60):
+        today = datetime.date.today()
+        mods = 0
+        for item in self.items:
+            if item.get("birthday") is not None:
+                continue
+            birthday = dateBetweenYears(today, -50, -18)
+            item["birthday"] = birthday.strftime(dateFormat)
+            mods += 1
+        print(Fore.GREEN + f"Birthday has ben added to {mods} items")
+
+    def addBirthState(self):
+        mods = 0
+        for item in self.items:
+            if item.get("birthState") is not None:
+                continue
+            availableStates = json.load(
+                open("./names/states.json", "r", encoding="UTF-8"))
+            mods += 0
+            item["birthState"] = random.choice(availableStates)[0]
+        print(Fore.GREEN + f"Birthday state has ben added to {mods} items")
+
+    def addRFC(self):
+        mods = 0
+        for item in self.items:
+            if item.get("RFC") is not None:
+                continue
+            RFC = "{mlname}{flname}{name}{bdate}{key}".format(
+                mlname=item.get("mLastName")[0:2],
+                flname=item.get("fLastName")[0:1],
+                name=item.get("name")[0:1],
+                bdate=datetime.datetime.strptime(
+                    item.get("birthday"), dateFormat).strftime("%y%m%d"),
+                key=genKey(characters, 3)
+            )
+            item["RFC"] = RFC.upper()
+            mods += 1
+        print(Fore.GREEN + f"RFC has ben added to {mods} items")
+
+    def addCURP(self):
+        mods = 0
+        for item in self.items:
+            if item.get("CURP") is not None:
+                continue
+            CURP = "{mlname}{flname}{name}{bdate}{gender}{bstate}{consa}{consb}{consc}{key}{verificationNumber}".format(
+                mlname=item.get("mLastName")[0] +
+                "".join(char for char in item.get(
+                    "mLastName") if char in "aeiou")[0],
+                flname=item.get("fLastName")[0:1].upper(),
+                name=item.get("name")[0:1].upper(),
+                bdate=datetime.datetime.strptime(
+                    item.get("birthday"), dateFormat).strftime("%y%m%d"),
+                gender=item.get("gender")[0],
+                bstate="".join(
+                    x[1] for x in json.load(open("./names/states.json", "r", encoding="UTF-8")) if x[0] == item.get("birthState")),
+                consa="".join(
+                    char for char in item.get("mLastName")if char in "bcdfghjklmnñpqrstvwxyz")[0],
+                consb="".join(
+                    char for char in item.get("fLastName")if char in "bcdfghjklmnñpqrstvwxyz")[0],
+                consc="".join(
+                    char for char in item.get("name")if char in "bcdfghjklmnñpqrstvwxyz")[0],
+                key=genKey(characters, 1),
+                verificationNumber=random.randrange(0, 9)
+
+
+            )
+            item["CURP"] = CURP.upper()
+            mods += 1
+        print(Fore.GREEN + f"CURP has ben added to {mods} items")
+
+    def addNSS(self):
+        mods = 0
+        for item in self.items:
+            if item.get("NSS") is not None:
+                continue
+            NSS = "{clinic}{registerDate}{bYear}{consecutive}{verificationNumber}".format(
+                clinic=random.randrange(10, 99),
+                registerDate=str(int(datetime.datetime.strptime(
+                    item.get("birthday"), dateFormat).strftime("%y")) + 18 + round(random.random()*5))[-2:],
+                bYear=datetime.datetime.strptime(
+                    item.get("birthday"), dateFormat).strftime("%y"),
+                consecutive=random.randrange(1000, 9999),
+                verificationNumber=random.randrange(0, 9)
+
+            )
+            item["NSS"] = NSS
 
     def addNames(self, attempts=5, unique=True):
         mods = 0
@@ -105,7 +219,7 @@ class Students(Persons):
             print(
                 Fore.YELLOW + f"grade has ben added to {mods} of {number} items")
 
-    def addScore(self, mu, sigma, minimalScore=5, maxScore=10, floatNumbers=2):
+    def addScore(self, mu, sigma, minimalScore=5, maxScore=10, floatNumbers=1):
         mods = 0
         for item in self.items:
             if item.get("score") is None:
@@ -121,23 +235,47 @@ class Students(Persons):
                 mods += 1
         print(Fore.GREEN + f"score has ben added to {mods} items")
 
+    def addSelections(self, options: list or tuple):
+        mods = 0
+        for item in self.items:
+            numbers = list(range(1, len(options)+1))
+            selections = shuffleList(numbers)
+            for option in options:
+                item[option] = selections.pop()
+                mods += 1
 
-students = Students()
-students.create(540)
-students.addGenre()
-students.addNames()
-students.addGrade(45, "2", group="A")
-students.addGrade(45, "2", group="B")
-students.addGrade(45, "2", group="C")
-students.addGrade(45, "2", group="D")
-students.addGrade(45, "4", group="A")
-students.addGrade(45, "4", group="B")
-students.addGrade(45, "4", group="C")
-students.addGrade(45, "4", group="D")
-students.addGrade(45, "6", group="A")
-students.addGrade(45, "6", group="B")
-students.addGrade(45, "6", group="C")
-students.addGrade(45, "6", group="D")
-students.addScore(8.5, 1)
+        print(Fore.GREEN + f"selections has ben added to {mods} items")
 
-students.saveAsCsv()
+
+# students = Students()
+# students.create(540)
+# students.addGenre()
+# students.addNames()
+# students.addGrade(45, "2", group="A")
+# students.addGrade(45, "2", group="B")
+# students.addGrade(45, "2", group="C")
+# students.addGrade(45, "2", group="D")
+# students.addGrade(45, "4", group="A")
+# students.addGrade(45, "4", group="B")
+# students.addGrade(45, "4", group="C")
+# students.addGrade(45, "4", group="D")
+# students.addGrade(45, "6", group="A")
+# students.addGrade(45, "6", group="B")
+# students.addGrade(45, "6", group="C")
+# students.addGrade(45, "6", group="D")
+# students.addScore(8.5, 1)
+# students.addSelections(["Op1", "Op2", "Op3", "Op4"])
+
+# students.saveAsCsv()
+
+
+persons = Persons()
+persons.create(500)
+persons.addGenre()
+persons.addNames()
+persons.addBirthDate()
+persons.addRFC()
+persons.addBirthState()
+persons.addCURP()
+persons.addNSS()
+persons.saveAsCsv()

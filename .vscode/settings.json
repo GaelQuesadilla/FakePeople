@@ -1,13 +1,25 @@
 {
-    "workbench.colorCustomizations": {
-        "sash.hoverBorder": "#552bd4",
-        "statusBar.background": "#4422aa",
-        "statusBar.debuggingBackground": "#88aa22",
-        "statusBar.debuggingForeground": "#15202b",
-        "statusBar.foreground": "#e7e7e7",
-        "statusBarItem.hoverBackground": "#552bd4",
-        "statusBarItem.remoteBackground": "#4422aa",
-        "statusBarItem.remoteForeground": "#e7e7e7",
-        "tab.activeBorder": "#552bd4"
-    }
+  "workbench.colorCustomizations": {
+    "sash.hoverBorder": "#552bd4",
+    "statusBar.background": "#4422aa",
+    "statusBar.debuggingBackground": "#88aa22",
+    "statusBar.debuggingForeground": "#15202b",
+    "statusBar.foreground": "#e7e7e7",
+    "statusBarItem.hoverBackground": "#552bd4",
+    "statusBarItem.remoteBackground": "#4422aa",
+    "statusBarItem.remoteForeground": "#e7e7e7",
+    "tab.activeBorder": "#552bd4"
+  },
+  "cSpell.words": [
+    "ABCDEFGHIJKLNÑMNOPQRSTUVWXYZ",
+    "aeiou",
+    "bcdfghjklmnñpqrstvwxyz",
+    "bdate",
+    "bstate",
+    "consa",
+    "consb",
+    "consc",
+    "flname",
+    "mlname"
+  ]
 }
