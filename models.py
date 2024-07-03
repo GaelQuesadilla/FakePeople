@@ -8,7 +8,7 @@ import datetime
 init(autoreset=True)
 dateFormat = "%d/%m/%Y"
 
-characters = "ABCDEFGHIJKLNÑMNOPQRSTUVWXYZ1234567890"
+characters = "ABCDEFGHIJKLNMNOPQRSTUVWXYZ1234567890"
 
 
 def dateBetweenYears(date, minYears, maxYears):
@@ -151,7 +151,7 @@ class Mexican(Persons):
         for item in self.items:
             if item.get("CURP") is not None:
                 continue
-            CURP = "{mlname}{flname}{name}{bdate}{gender}{bstate}{consa}{consb}{consc}{key}{verificationNumber}".format(
+            CURP = "{mlname}{flname}{name}{bdate}{gender}{bstate}{consa}{consb}{consc}".format(
                 mlname=item.get("mLastName")[0] +
                 "".join(char for char in item.get(
                     "mLastName") if char in "aeiou")[0],
@@ -159,7 +159,8 @@ class Mexican(Persons):
                 name=item.get("name")[0:1].upper(),
                 bdate=datetime.datetime.strptime(
                     item.get("birthday"), dateFormat).strftime("%y%m%d"),
-                gender=item.get("gender")[0],
+                gender=item.get("gender")[0].upper().replace(
+                    "M", "H").replace("F", "M"),
                 bstate="".join(
                     x[1] for x in json.load(open("./names/states.json", "r", encoding="UTF-8")) if x[0] == item.get("birthState")),
                 consa="".join(
@@ -168,12 +169,27 @@ class Mexican(Persons):
                     char for char in item.get("fLastName")if char in "bcdfghjklmnñpqrstvwxyz")[0],
                 consc="".join(
                     char for char in item.get("name")if char in "bcdfghjklmnñpqrstvwxyz")[0],
-                key=genKey(characters, 1),
-                verificationNumber=random.randrange(0, 9)
-
-
+                key=genKey(characters, 1)
             )
+            if datetime.datetime.strptime(item.get("birthday"), dateFormat).year <= 1999:
+                CURP += str(random.randrange(0, 9))
+            else:
+                CURP += genKey(characters, 1)
+
+            def getValue(char):
+                values = "0123456789ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"
+                return values.find(str(char))
+
+            tmpCURP = CURP + "0"
+            total = 0
+            for i in range(0, len(tmpCURP)):
+                char = tmpCURP[::-1][i]
+                total += getValue(char)*(i+1)
+
+            CURP += str(total % 10)
+
             item["CURP"] = CURP.upper()
+
             mods += 1
         print(Fore.GREEN + f"CURP has ben added to {mods} items")
 
@@ -239,31 +255,9 @@ class Students(Persons):
         print(Fore.GREEN + f"selections has ben added to {mods} items")
 
 
-# students = Students()
-# students.create(540)
-# students.addGenre()
-# students.addNames()
-# students.addGrade(45, "2", group="A")
-# students.addGrade(45, "2", group="B")
-# students.addGrade(45, "2", group="C")
-# students.addGrade(45, "2", group="D")
-# students.addGrade(45, "4", group="A")
-# students.addGrade(45, "4", group="B")
-# students.addGrade(45, "4", group="C")
-# students.addGrade(45, "4", group="D")
-# students.addGrade(45, "6", group="A")
-# students.addGrade(45, "6", group="B")
-# students.addGrade(45, "6", group="C")
-# students.addGrade(45, "6", group="D")
-# students.addScore(8.5, 1)
-# students.addSelections(["Op1", "Op2", "Op3", "Op4"])
-
-# students.saveAsCsv()
-
-
 if __name__ == "__main__":
     persons = Mexican()
-    persons.create(500)
+    persons.create(150)
     persons.addGenre()
     persons.addNames()
     persons.addBirthDate()
